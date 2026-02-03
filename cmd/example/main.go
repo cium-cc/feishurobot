@@ -167,7 +167,7 @@ func sendInteractiveCard(client *feishubot.Client) error {
 func sendInteractiveCardWithButtons(client *feishubot.Client) error {
 	// Build a card with header, markdown body, and buttons
 	card := feishubot.NewCard("2.0").
-		SetConfig(map[string]any{
+		SetConfig(map[string]interface{}{
 			"wide_screen_mode": true,
 		}).
 		SetHeader(&feishubot.CardHeader{

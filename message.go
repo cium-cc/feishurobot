@@ -36,11 +36,11 @@ const (
 
 // Message represents a message to be sent to Feishu webhook.
 type Message struct {
-	MsgType   MsgType        `json:"msg_type"`
-	Content   map[string]any `json:"content,omitempty"`
-	Card      map[string]any `json:"card,omitempty"`
-	Timestamp int64          `json:"timestamp,omitempty"`
-	Sign      string         `json:"sign,omitempty"`
+	MsgType   MsgType                `json:"msg_type"`
+	Content   map[string]interface{} `json:"content,omitempty"`
+	Card      map[string]interface{} `json:"card,omitempty"`
+	Timestamp int64                  `json:"timestamp,omitempty"`
+	Sign      string                 `json:"sign,omitempty"`
 }
 
 // PostContent represents the content of a rich text (post) message.
@@ -61,11 +61,11 @@ type Paragraph []Element
 
 // Element represents an element within a paragraph.
 // Valid element types: TextElement, LinkElement, AtElement, ImageElement.
-type Element map[string]any
+type Element map[string]interface{}
 
 // NewTextElement creates a plain text element.
 func NewTextElement(text string) Element {
-	return map[string]any{
+	return map[string]interface{}{
 		"tag":  "text",
 		"text": text,
 	}
@@ -74,7 +74,7 @@ func NewTextElement(text string) Element {
 // NewLinkElement creates a hyperlink element.
 // The href must be a valid URL, otherwise the message will fail to send.
 func NewLinkElement(text, href string) Element {
-	return map[string]any{
+	return map[string]interface{}{
 		"tag":  "a",
 		"text": text,
 		"href": href,
@@ -85,7 +85,7 @@ func NewLinkElement(text, href string) Element {
 // For external groups, only Open ID is supported for @ single user.
 // For @ all, use "all" as user_id.
 func NewAtElement(userID, userName string) Element {
-	return map[string]any{
+	return map[string]interface{}{
 		"tag":       "at",
 		"user_id":   userID,
 		"user_name": userName,
@@ -95,7 +95,7 @@ func NewAtElement(userID, userName string) Element {
 // NewImageElement creates an image element within a paragraph.
 // The imageKey must be obtained from Feishu image upload API.
 func NewImageElement(imageKey string) Element {
-	return map[string]any{
+	return map[string]interface{}{
 		"tag":       "img",
 		"image_key": imageKey,
 	}
@@ -103,7 +103,7 @@ func NewImageElement(imageKey string) Element {
 
 // NewEmoticonElement creates an emoticon/emoji element.
 func NewEmoticonElement(emojiKey string) Element {
-	return map[string]any{
+	return map[string]interface{}{
 		"tag":       "emotion",
 		"emoji_key": emojiKey,
 	}
@@ -146,9 +146,9 @@ func NewPostLanguageContent(lang Language, content *PostContent) PostLanguageCon
 func NewPostMessage(lang Language, content *PostContent) *Message {
 	return &Message{
 		MsgType: MsgTypePost,
-		Content: map[string]any{
-			"post": map[string]any{
-				string(lang): map[string]any{
+		Content: map[string]interface{}{
+			"post": map[string]interface{}{
+				string(lang): map[string]interface{}{
 					"title":   content.Title,
 					"content": convertParagraphs(content.Content),
 				},
@@ -169,9 +169,9 @@ func NewPostMessage(lang Language, content *PostContent) *Message {
 //		feishubot.NewPostLanguageContent(feishubot.LanguageEnUS, content),
 //	)
 func NewPostMessageMultiLanguage(langContents ...PostLanguageContent) *Message {
-	postData := make(map[string]any)
+	postData := make(map[string]interface{})
 	for _, lc := range langContents {
-		postData[string(lc.Language)] = map[string]any{
+		postData[string(lc.Language)] = map[string]interface{}{
 			"title":   lc.Content.Title,
 			"content": convertParagraphs(lc.Content.Content),
 		}
@@ -179,17 +179,17 @@ func NewPostMessageMultiLanguage(langContents ...PostLanguageContent) *Message {
 
 	return &Message{
 		MsgType: MsgTypePost,
-		Content: map[string]any{
+		Content: map[string]interface{}{
 			"post": postData,
 		},
 	}
 }
 
 // convertParagraphs converts Paragraph type to the expected JSON structure.
-func convertParagraphs(paragraphs []Paragraph) [][]map[string]any {
-	result := make([][]map[string]any, 0, len(paragraphs))
+func convertParagraphs(paragraphs []Paragraph) [][]map[string]interface{} {
+	result := make([][]map[string]interface{}, 0, len(paragraphs))
 	for _, p := range paragraphs {
-		paragraphArray := make([]map[string]any, 0, len(p))
+		paragraphArray := make([]map[string]interface{}, 0, len(p))
 		for _, e := range p {
 			paragraphArray = append(paragraphArray, e)
 		}
@@ -208,7 +208,7 @@ func convertParagraphs(paragraphs []Paragraph) [][]map[string]any {
 func NewTextMessage(text string) *Message {
 	return &Message{
 		MsgType: MsgTypeText,
-		Content: map[string]any{
+		Content: map[string]interface{}{
 			"text": text,
 		},
 	}
@@ -221,7 +221,7 @@ func NewTextMessage(text string) *Message {
 func NewImageMessage(imageKey string) *Message {
 	return &Message{
 		MsgType: MsgTypeImage,
-		Content: map[string]any{
+		Content: map[string]interface{}{
 			"image_key": imageKey,
 		},
 	}
@@ -235,7 +235,7 @@ func NewImageMessage(imageKey string) *Message {
 func NewShareChatMessage(shareChatID string) *Message {
 	return &Message{
 		MsgType: MsgTypeShareChat,
-		Content: map[string]any{
+		Content: map[string]interface{}{
 			"share_chat_id": shareChatID,
 		},
 	}
@@ -243,10 +243,10 @@ func NewShareChatMessage(shareChatID string) *Message {
 
 // Card represents an interactive card.
 type Card struct {
-	Schema string         `json:"schema"`
-	Config map[string]any `json:"config,omitempty"`
-	Body   *CardBody      `json:"body,omitempty"`
-	Header *CardHeader    `json:"header,omitempty"`
+	Schema string                 `json:"schema"`
+	Config map[string]interface{} `json:"config,omitempty"`
+	Body   *CardBody              `json:"body,omitempty"`
+	Header *CardHeader            `json:"header,omitempty"`
 }
 
 // CardBody represents the body section of a card.
@@ -287,11 +287,11 @@ func NewCardMarkdownTitle(content string) *CardTitle {
 }
 
 // CardElement represents an element in the card body.
-type CardElement map[string]any
+type CardElement map[string]interface{}
 
 // NewMarkdownElement creates a markdown text element.
 func NewMarkdownElement(content string) CardElement {
-	return map[string]any{
+	return map[string]interface{}{
 		"tag":     "markdown",
 		"content": content,
 	}
@@ -299,7 +299,7 @@ func NewMarkdownElement(content string) CardElement {
 
 // NewDivElement creates a div element.
 func NewDivElement(text *CardTitle) CardElement {
-	return map[string]any{
+	return map[string]interface{}{
 		"tag":  "div",
 		"text": text,
 	}
@@ -307,9 +307,9 @@ func NewDivElement(text *CardTitle) CardElement {
 
 // NewButtonElement creates a button element.
 func NewButtonElement(text, buttonType string, url string) CardElement {
-	return map[string]any{
+	return map[string]interface{}{
 		"tag": "button",
-		"text": map[string]any{
+		"text": map[string]interface{}{
 			"tag":     "plain_text",
 			"content": text,
 		},
@@ -326,7 +326,7 @@ func NewCard(schema string) *Card {
 }
 
 // SetConfig sets the config for the card.
-func (c *Card) SetConfig(config map[string]any) *Card {
+func (c *Card) SetConfig(config map[string]interface{}) *Card {
 	c.Config = config
 	return c
 }
@@ -344,8 +344,8 @@ func (c *Card) SetHeader(header *CardHeader) *Card {
 }
 
 // ToMap converts the Card to a map for JSON serialization.
-func (c *Card) ToMap() map[string]any {
-	result := map[string]any{
+func (c *Card) ToMap() map[string]interface{} {
+	result := map[string]interface{}{
 		"schema": c.Schema,
 	}
 
@@ -392,7 +392,7 @@ func NewInteractiveMessage(card *Card) *Message {
 //
 // Note: Interactive cards sent via custom bot only support URL navigation,
 // not request callback interactions.
-func NewInteractiveMessageFromMap(card map[string]any) *Message {
+func NewInteractiveMessageFromMap(card map[string]interface{}) *Message {
 	return &Message{
 		MsgType: MsgTypeInteractive,
 		Card:    card,
